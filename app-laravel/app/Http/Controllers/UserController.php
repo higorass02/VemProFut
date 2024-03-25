@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserRequest;
 use App\Repositories\UserRepository;
-use Carbon\Carbon;
-use DateTime;
-use Exception;
 
 class UserController extends Controller
 {
@@ -18,25 +17,22 @@ class UserController extends Controller
     {
         $this->userRepository = new UserRepository();
     }
-    
+
     public function index()
     {
-        $users = User::all();
-        return response()->json($users);
+        try{
+            $users = $this->userRepository->all();
+            return response()->json($users);
+        }catch(Exception $e){
+            dd($e);
+        }
     }
 
     public function store(Request $request)
     {
-        $payload = $request->all();
         try{
-            $user = new User();
-            foreach($payload as $key => $value){
-                if('dt_nasc' == $key){
-                    $value = new Carbon($value);
-                }
-                $user->$key = $value;
-            }
-            $user->save();
+            $payload = new UserRequest($request->all());
+            $user = $this->userRepository->create($payload->query());
             return response()->json($user, 201);
         }catch(Exception $e){
             dd($e);
@@ -45,21 +41,32 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user = User::findOrFail($id);
-        return response()->json($user);
+        try{
+            $user = $this->userRepository->find($id);
+            return response()->json($user);
+        }catch(Exception $e){
+            dd($e);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $user = User::findOrFail($id);
-        $user->update($request->all());
-        return response()->json($user, 200);
+        try{
+            $payload = new UserRequest($request->all());
+            $user = $this->userRepository->update($payload->query(), $id);
+            return response()->json($user, 201);
+        }catch(Exception $e){
+            dd($e);
+        }
     }
 
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
-        return response()->json(null, 204);
+        try{
+            $this->userRepository->delete($id);
+            return response()->json(['message' => "usuario ".$id." excluido com sucesso!"] , 201);
+        }catch(Exception $e){
+            dd($e);
+        }
     }
 }

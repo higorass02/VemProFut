@@ -9,12 +9,12 @@ class UserRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
-            'apelido' => 'string|max:255',
-            'sexo' => 'string|max:1',
-            'celular' => 'string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . ($this->user ? $this->user->id : null),
-            'password' => 'string|min:8',
+            "name" => 'required|string|max:255',
+            "apelido" => 'string|max:255',
+            "sexo" => 'string|max:1',
+            "celular" => 'string|max:255',
+            "email" => 'required|string|email|max:255|unique:users,email,',
+            "password" => 'string|min:8',
         ];
     }
 

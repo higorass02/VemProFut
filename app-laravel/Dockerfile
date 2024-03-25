@@ -12,7 +12,15 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip
+    unzip \
+    && docker-php-ext-install pdo_mysql mbstring xml
+
+# Instale o Xdebug
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
+
+# Copie o arquivo de configuração do Xdebug para o diretório correto
+COPY xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -40,3 +48,6 @@ WORKDIR /var/www
 COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
 
 USER $user
+
+# Exponha a porta 9003 para o Xdebug
+EXPOSE 9003
