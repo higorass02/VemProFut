@@ -21,7 +21,6 @@ class UserRepository
 
     public function create(array $data)
     {
-        $this->user = new User();
         $this->user->nome = $data['nome'];
         $this->user->email = $data['email'];
         $this->user->sexo = $data['sexo'];

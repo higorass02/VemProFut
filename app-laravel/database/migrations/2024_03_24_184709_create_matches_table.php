@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('matches', function (Blueprint $table) {
+        Schema::create('matches_soccer', function (Blueprint $table) {
             $table->id();
+            $table->integer('user_id')->nullable(false);
+            $table->integer('status')->default(1);
+            /*$table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');*/
             $table->timestamps();
         });
     }
@@ -22,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('matches');
+        Schema::dropIfExists('matches_soccer');
     }
 };
