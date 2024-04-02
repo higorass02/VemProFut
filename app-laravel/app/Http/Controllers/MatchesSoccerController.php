@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
+use App\Repositories\UserRepository;
 use App\Http\Requests\MatchSoccerRequest;
 use App\Repositories\MatchSoccerRepository;
 
 class MatchesSoccerController extends Controller
 {
     private MatchSoccerRepository $matchSoccerRepository;
+    private UserRepository $userRepository;
 
     public function __construct()
     {
+        $this->userRepository = new UserRepository();
         $this->matchSoccerRepository = new MatchSoccerRepository();
     }
 
@@ -21,8 +24,11 @@ class MatchesSoccerController extends Controller
         try{
             $matchSoccer = $this->matchSoccerRepository->all();
             return response()->json($matchSoccer);
-        }catch(Exception $e){
+        }catch(\InvalidArgumentException $e){
+            return response()->json(['message' => $e->getMessage()], 400);
+        }catch(\Exception $e){
             dd($e);
+            return response()->json(['message' => 'Error Critical'], 500);
         }
     }
 
@@ -30,10 +36,13 @@ class MatchesSoccerController extends Controller
     {
         try{
             $payload = new MatchSoccerRequest($request->all());
+            $this->userExistValidator($payload['user_id']);
             $matchSoccer = $this->matchSoccerRepository->create($payload->query());
             return response()->json($matchSoccer, 201);
-        }catch(Exception $e){
-            dd($e);
+        }catch(\InvalidArgumentException $e){
+            return response()->json(['message' => $e->getMessage()], 400);
+        }catch(\Exception $e){
+            return response()->json(['message' => 'Error Critical'], 500);
         }
     }
 
@@ -42,8 +51,10 @@ class MatchesSoccerController extends Controller
         try{
             $matchSoccer = $this->matchSoccerRepository->find($id);
             return response()->json($matchSoccer);
-        }catch(Exception $e){
-            dd($e);
+        }catch(\InvalidArgumentException $e){
+            return response()->json(['message' => $e->getMessage()], 400);
+        }catch(\Exception $e){
+            return response()->json(['message' => 'Error Critical'], 500);
         }
     }
 
@@ -53,8 +64,10 @@ class MatchesSoccerController extends Controller
             $payload = new MatchSoccerRequest($request->all());
             $matchSoccer = $this->matchSoccerRepository->update($payload->query(), $id);
             return response()->json($matchSoccer, 201);
-        }catch(Exception $e){
-            dd($e);
+        }catch(\InvalidArgumentException $e){
+            return response()->json(['message' => $e->getMessage()], 400);
+        }catch(\Exception $e){
+            return response()->json(['message' => 'Error Critical'], 500);
         }
     }
 
@@ -63,8 +76,17 @@ class MatchesSoccerController extends Controller
         try{
             $this->matchSoccerRepository->delete($id);
             return response()->json(['message' => "partida ".$id." excluida com sucesso!"] , 201);
-        }catch(Exception $e){
-            dd($e);
+        }catch(\InvalidArgumentException $e){
+            return response()->json(['message' => $e->getMessage()], 400);
+        }catch(\Exception $e){
+            return response()->json(['message' => 'Error Critical'], 500);
+        }
+    }
+
+    public function userExistValidator($user_id)
+    {
+        if(is_null($this->userRepository->find($user_id))){
+            throw new InvalidArgumentException('User Not Found!');
         }
     }
 }

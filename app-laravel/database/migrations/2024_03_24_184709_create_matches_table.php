@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('matches_soccer', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->nullable(false);
             $table->integer('status')->default(1);
-            /*$table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');*/
+            $table->bigInteger('user_id')->unsigned()->index()->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
