@@ -31,6 +31,11 @@ class MatchSoccerRepository
         return $this->model->find($id);
     }
 
+    public function getListByIdMatch($matchId)
+    {
+        return $this->model->where('match_id',$matchId)->get();
+    }
+
     private function validationChangeStatus($status)
     {
         if($this->model->status != $status){

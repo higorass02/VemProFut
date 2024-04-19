@@ -23,12 +23,12 @@ class DatabaseSeeder extends Seeder
         $i = 1;
         while ($i <= 5) {
             DB::table('users')->insert([
-                'nome' => $faker->name(),
-                'apelido' => $faker->name(),
-                'celular' => $faker->phoneNumber(),
-                'dt_nasc' => $faker->date(),
-                'papel' => rand(1,2),
-                'sexo' => $this->getSexo(),
+                'name' => $faker->name(),
+                'alias' => $faker->name(),
+                'phone' => $faker->phoneNumber(),
+                'dt_birthdate' => $faker->date(),
+                'role' => rand(1,2),
+                'gender' => $this->getSexo(),
                 'email' => $faker->email(),
                 'password' => Hash::make('password'),
                 'created_at' => new Carbon(),
@@ -37,16 +37,28 @@ class DatabaseSeeder extends Seeder
             $i++;
         }
 
-        $users = DB::table('users')->select(['id'])->get();
+        $user = DB::table('users')->select(['id'])->get()->first();
 
-        foreach($users as $user){
-            DB::table('matches_Soccer')->insert([
-                'user_id' => $user->id,
-                'status' => $this->getStatus(),
-                'created_at' => new Carbon(),
-                'updated_at' => new Carbon()
-            ]);
-        }
+        
+        DB::table('matches_soccer')->insert([
+            'user_id' => $user->id,
+            'status' => $this->getStatusMatch(),
+            'created_at' => new Carbon(),
+            'updated_at' => new Carbon()
+        ]);
+
+        $match = DB::table('users')->select(['id'])->get()->first();
+
+        // $t = 0;
+        // while ($t <= 1) {
+        //     DB::table('team')->insert([
+        //         'user_id' => $user->id,
+        //         'match_id' => $match->id,
+        //         'status' => $this->getStatusTeam(),
+        //         'created_at' => new Carbon(),
+        //         'updated_at' => new Carbon()
+        //     ]);
+        // }
     }
     function getSexo()
     {
@@ -54,7 +66,13 @@ class DatabaseSeeder extends Seeder
         return $array[array_rand($array)];
     }
 
-    function getStatus()
+    function getStatusMatch()
+    {
+        $array = array(MatchSoccer::STATUS_CREATED, MatchSoccer::STATUS_FINISHED, MatchSoccer::STATUS_IN_PROGRESS);
+        return $array[array_rand($array)];
+    }
+
+    function getStatusTeam()
     {
         $array = array(MatchSoccer::STATUS_CREATED, MatchSoccer::STATUS_FINISHED, MatchSoccer::STATUS_IN_PROGRESS);
         return $array[array_rand($array)];

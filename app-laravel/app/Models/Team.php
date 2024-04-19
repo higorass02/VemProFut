@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
+
+class Team extends Model
+{
+    const STATUS_DISABLED = 0;
+    const STATUS_ENABLED = 1;
+
+    protected $fillable = [
+        'user_id',
+        'match_id',
+        'team_number',
+        'status'
+    ];
+
+    protected $hidden = [];
+
+    protected $casts = [];
+    protected $table = 'team';
+
+    public function getStatus() : array {
+        return [
+            self::STATUS_DISABLED,
+            self::STATUS_ENABLED
+        ];
+    }
+}
