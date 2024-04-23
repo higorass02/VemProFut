@@ -2,9 +2,11 @@
 
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MatchSoccer extends Model
 {
+    use SoftDeletes;
     const STATUS_FINISHED = 0;
     const STATUS_CREATED = 1;
     const STATUS_IN_PROGRESS = 2;
@@ -15,7 +17,9 @@ class MatchSoccer extends Model
 
     protected $hidden = [];
 
-    protected $casts = [];
+    protected $casts = [
+        'user_id' => User::class,
+    ];
     protected $table = 'matches_soccer';
 
     public function getStatus() : array {

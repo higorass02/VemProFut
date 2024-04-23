@@ -2,9 +2,11 @@
 
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Team extends Model
 {
+    use SoftDeletes;
     const STATUS_DISABLED = 0;
     const STATUS_ENABLED = 1;
 
@@ -17,7 +19,10 @@ class Team extends Model
 
     protected $hidden = [];
 
-    protected $casts = [];
+    protected $casts = [
+        'user_id' => User::class,
+        'match_id' => MatchSoccer::class
+    ];
     protected $table = 'team';
 
     public function getStatus() : array {

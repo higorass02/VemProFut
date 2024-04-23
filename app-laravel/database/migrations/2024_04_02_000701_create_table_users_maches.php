@@ -19,8 +19,9 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->bigInteger('match_id')->unsigned()->index();
             $table->foreign('match_id')->references('id')->on('matches_soccer')->onDelete('cascade');
-            $table->timestamps();
             $table->unique(['user_id', 'match_id', 'team_number']);
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
