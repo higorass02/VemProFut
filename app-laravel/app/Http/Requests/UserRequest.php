@@ -13,7 +13,7 @@ class UserRequest extends FormRequest
             "apelido" => 'string|max:255',
             "sexo" => 'string|max:1',
             "celular" => 'string|max:255',
-            "email" => 'required|string|email|max:255|unique:users,email,',
+            "email" => 'required|string|email|max:255|unique:users,email',
             "password" => 'string|min:8',
         ];
     }

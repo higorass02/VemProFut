@@ -19,10 +19,7 @@ class Team extends Model
 
     protected $hidden = [];
 
-    protected $casts = [
-        'user_id' => User::class,
-        'match_id' => MatchSoccer::class
-    ];
+    protected $casts = [];
     protected $table = 'team';
 
     public function getStatus() : array {

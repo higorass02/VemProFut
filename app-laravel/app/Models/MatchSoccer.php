@@ -17,9 +17,7 @@ class MatchSoccer extends Model
 
     protected $hidden = [];
 
-    protected $casts = [
-        'user_id' => User::class,
-    ];
+    protected $casts = [];
     protected $table = 'matches_soccer';
 
     public function getStatus() : array {

@@ -21,7 +21,6 @@ class MatchConfig extends Model
     protected $casts = [
         'goal_keeper_fix' => 'boolean',
         'prioritize_payers' => 'boolean',
-        'match_id' => MatchSoccer::class,
         'max_playes_line' => 'Integer'
     ];
     protected $table = 'matches_config';

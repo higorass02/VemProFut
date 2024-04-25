@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Exception;
 use Illuminate\Http\Request;
-use App\Http\Requests\UserRequest;
+use App\Http\Requests\UserGroupRequest;
 use App\Repositories\UserGroupRepository;
 
 class UserGroupController extends Controller
@@ -29,7 +29,7 @@ class UserGroupController extends Controller
     public function store(Request $request)
     {
         try{
-            $payload = new UserRequest($request->all());
+            $payload = new UserGroupRequest($request->all());
             $userGroup = $this->userGroupRepository->create($payload->query());
             return response()->json($userGroup, 201);
         }catch(Exception $e){
@@ -50,7 +50,7 @@ class UserGroupController extends Controller
     public function update(Request $request, $id)
     {
         try{
-            $payload = new UserRequest($request->all());
+            $payload = new UserGroupRequest($request->all());
             $userGroup = $this->userGroupRepository->update($payload->query(), $id);
             return response()->json($userGroup, 201);
         }catch(Exception $e){

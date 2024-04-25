@@ -12,8 +12,5 @@ class UserGroup extends Model
         'group_id',
     ];
     protected $hidden = [];
-    protected $casts = [
-        'user_id' => User::class,
-        'group_id' => Group::class
-    ];
+    protected $casts = [];
 }
