@@ -9,7 +9,6 @@ class TeamRequest extends FormRequest
     public function rules()
     {
         return [
-            "user_id" => 'required|numeric',
             "match_id" => 'required|numeric',
         ];
     }

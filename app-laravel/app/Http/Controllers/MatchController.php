@@ -36,12 +36,12 @@ class MatchController extends Controller
     {
         try{
             $payload = new MatchSoccerRequest($request->all());
-            $this->userExistValidator($payload['user_id']);
             $matchSoccer = $this->matchSoccerRepository->create($payload->query());
             return response()->json($matchSoccer, 201);
         }catch(\InvalidArgumentException $e){
             return response()->json(['message' => $e->getMessage()], 400);
         }catch(\Exception $e){
+            dd($e);
             return response()->json(['message' => 'Error Critical'], 500);
         }
     }
@@ -67,6 +67,7 @@ class MatchController extends Controller
         }catch(\InvalidArgumentException $e){
             return response()->json(['message' => $e->getMessage()], 400);
         }catch(\Exception $e){
+            dd($e);
             return response()->json(['message' => 'Error Critical'], 500);
         }
     }
@@ -80,13 +81,6 @@ class MatchController extends Controller
             return response()->json(['message' => $e->getMessage()], 400);
         }catch(\Exception $e){
             return response()->json(['message' => 'Error Critical'], 500);
-        }
-    }
-
-    public function userExistValidator($user_id)
-    {
-        if(is_null($this->userRepository->find($user_id))){
-            throw new InvalidArgumentException('User Not Found!');
         }
     }
 }

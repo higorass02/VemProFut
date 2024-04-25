@@ -10,6 +10,7 @@ class MatchSoccerRequest extends FormRequest
     {
         return [
             "user_id" => 'required|numeric',
+            "group_id" => 'numeric',
         ];
     }
 

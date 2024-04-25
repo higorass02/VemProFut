@@ -39,12 +39,12 @@ class TeamController extends Controller
     {
         try{
             $payload = new TeamRequest($request->all());
-            $this->existUserAndMatchesValidator($payload['user_id'], $payload['match_id']);
             $team = $this->teamRepository->create($payload->query());
             return response()->json($team, 201);
         }catch(\InvalidArgumentException $e){
             return response()->json(['message' => $e->getMessage()], 400);
         }catch(\Exception $e){
+            dd($e);
             return response()->json(['message' => 'Error Critical'], 500);
         }
     }
@@ -83,16 +83,6 @@ class TeamController extends Controller
             return response()->json(['message' => $e->getMessage()], 400);
         }catch(\Exception $e){
             return response()->json(['message' => 'Error Critical'], 500);
-        }
-    }
-
-    public function existUserAndMatchesValidator($user_id, $match_id)
-    {
-        if(is_null($this->userRepository->find($user_id))){
-            throw new InvalidArgumentException('User Not Found!');
-        }
-        if(is_null($this->matchSoccerRepository->find($match_id))){
-            throw new InvalidArgumentException('Match Not Found!');
         }
     }
 }

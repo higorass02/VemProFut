@@ -16,6 +16,8 @@ return new class extends Migration
             $table->integer('status')->default(1);
             $table->bigInteger('user_id')->unsigned()->index()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->bigInteger('group_id')->unsigned()->index()->nullable();
+            $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

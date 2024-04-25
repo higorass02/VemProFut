@@ -7,10 +7,18 @@ use App\Models\Team;
 class TeamRepository
 {
     private Team $model;
+    private UserRepository $userRepository;
+    private MatchSoccerRepository $matchRepository;
 
-    public function __construct(?Team $model = null)
+    public function __construct(
+        ?Team $model = null,
+        ?UserRepository $userRepository = null,
+        ?MatchSoccerRepository $matchRepository = null
+    )
     {
         $this->model = $model ?? new Team();
+        $this->userRepository = $userRepository ?? new UserRepository();
+        $this->matchRepository = $matchRepository ?? new MatchSoccerRepository();
     }
 
     public function all()
@@ -20,7 +28,10 @@ class TeamRepository
 
     public function create(array $data)
     {
-        $this->userMatchValidation($data);
+        $this->userValidation($data);
+        $this->matchValidation($data);
+        //buscar usuario do grupo
+
         $this->model->user_id = $data['user_id'];
         $this->model->match_id = $data['match_id'];
         $this->model->status = Team::STATUS_ENABLED;
@@ -51,20 +62,6 @@ class TeamRepository
         $user->delete();
     }
 
-    public function userMatchValidation(array $data)
-    {
-        $teams = $this->model->where('user_id', $data['user_id'])
-                    ->where('match_id', $data['match_id'])
-                    ->get();
-
-        foreach($teams as $team){
-            
-        }
-        // if($validation){
-        //     throw new \InvalidArgumentException('O Jogador já está dentro desta partida!');
-        // }
-    }
-
     private function validationChangeStatus(int $status)
     {
         if($this->model->status == $status){
@@ -78,6 +75,24 @@ class TeamRepository
     {
         if(is_null($this->model)){
             throw new \InvalidArgumentException("Jogador ainda não convocado para este Time");
+        }
+    }
+
+    public function userValidation($userId)
+    {
+        if(!$this->userRepository->find($userId)){
+            throw new \InvalidArgumentException('User not Found!');
+        }
+    }
+    
+    public function matchValidation($matchId)
+    {
+        $match = $this->matchRepository->find($matchId)[0];
+        if(!$match){
+            throw new \InvalidArgumentException('Match not Found!');
+        }
+        if(!$match->config){
+            throw new \InvalidArgumentException('Match config not Found!');
         }
     }
 }

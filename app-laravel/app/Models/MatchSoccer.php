@@ -3,6 +3,7 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class MatchSoccer extends Model
 {
@@ -12,6 +13,7 @@ class MatchSoccer extends Model
     const STATUS_IN_PROGRESS = 2;
     protected $fillable = [
         'user_id',
+        'group_id',
         'status',
     ];
 
@@ -26,5 +28,14 @@ class MatchSoccer extends Model
             self::STATUS_CREATED,
             self::STATUS_IN_PROGRESS
         ];
+    }
+    public function config(): HasOne
+    {
+        return $this->hasOne(MatchConfig::class, 'match_id', 'id');
+    }
+
+    public function group(): ?HasOne
+    {
+        return $this->hasOne(Group::class, 'group_id', 'id');
     }
 }
