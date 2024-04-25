@@ -11,13 +11,14 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    const PAPEL_ADMIN_SYSTEM = 0;
-    const PAPEL_JOGADOR = 1;
-    const PAPEL_JOGADOR_ADMIN = 2;
+    const ROLE_ADMIN_SYSTEM = 0;
+    const ROLE_JOGADOR = 1;
+    const ROLE_JOGADOR_ADMIN = 2;
 
     const SEXO_MASCULINO = "M";
     const SEXO_FEMININO = "F";
     const SEXO_INDEFINIDO = "I";
+
     /**
      * The attributes that are mass assignable.
      *

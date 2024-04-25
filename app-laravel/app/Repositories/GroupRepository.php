@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 use App\Models\Group;
+use InvalidArgumentException;
+
 class GroupRepository
 {
     protected $group;
@@ -33,8 +35,15 @@ class GroupRepository
     public function update(array $data, $id)
     {
         $this->group = Group::where('id', $id)->get()->first();
+        $isDirty = false;
         foreach($data as $key => $value){
-            $this->group->$key = $value;
+            if($this->group->$key != $value){
+                $isDirty = true;
+                $this->group->$key = $value;
+            }
+        }
+        if(!$isDirty){
+            throw new InvalidArgumentException('no data to be updated!');
         }
         $this->group->save();
         return $this->group;

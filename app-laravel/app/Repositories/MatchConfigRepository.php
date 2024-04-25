@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\MatchConfig;
+use InvalidArgumentException;
 
 class MatchConfigRepository
 {
@@ -43,11 +44,17 @@ class MatchConfigRepository
     public function update($id, $matchId, array $data)
     {
         $this->model = MatchConfig::where('id', $id)->orderBy('id', 'desc')->get()->first();
+        $isDirty = false;
         if($this->model->match_id != $matchId){
+            $isDirty = true;
             $this->model->match_id = $matchId;
         }
         foreach($data as $key => $value){
+            $isDirty = true;
             $this->model->$key = $value;
+        }
+        if(!$isDirty){
+            throw new InvalidArgumentException('no data to be updated!');
         }
         $this->model->save();
         

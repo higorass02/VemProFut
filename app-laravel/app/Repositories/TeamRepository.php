@@ -39,6 +39,7 @@ class TeamRepository
         $this->validationExist();
         $this->validationChangeStatus($data['status']);
         $this->model->status = $data['status'];
+        
         $this->model->save();
 
         return $this->model;
