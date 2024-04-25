@@ -21,7 +21,7 @@ class MatchConfig extends Model
     protected $casts = [
         'goal_keeper_fix' => 'boolean',
         'prioritize_payers' => 'boolean',
-        'max_playes_line' => 'Integer'
+        'max_playes_line' => 'integer'
     ];
     protected $table = 'matches_config';
 }

@@ -21,14 +21,14 @@ class UserRepository
 
     public function create(array $data)
     {
-        $this->user->nome = $data['nome'];
+        $this->user->name = $data['name'];
         $this->user->email = $data['email'];
-        $this->user->sexo = $data['sexo'];
-        $this->user->celular = $data['celular'];
-        $this->user->apelido = $data['apelido'];
+        $this->user->gender = $data['gender'];
+        $this->user->phone = $data['phone'];
+        $this->user->alias = $data['alias'];
         $this->user->password = $data['password'];
-        $this->user->papel = $data['papel'];
-        $this->user->dt_nasc = new Carbon($data['dt_nasc']);
+        $this->user->id_role = $data['id_role'];
+        $this->user->dt_birthdate = new Carbon($data['dt_birthdate']);
         $this->user->save();
         return $this->user;
     }
@@ -42,7 +42,7 @@ class UserRepository
     {
         $this->user = User::where('id', $id)->get()->first();
         foreach($data as $key => $value){
-            if($key == 'dt_nasc'){
+            if($key == 'dt_birthdate'){
                 $value = new Carbon($value);
             }
             $this->user->$key = $value;

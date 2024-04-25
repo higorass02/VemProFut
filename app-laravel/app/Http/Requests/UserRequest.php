@@ -10,11 +10,12 @@ class UserRequest extends FormRequest
     {
         return [
             "name" => 'required|string|max:255',
-            "apelido" => 'string|max:255',
-            "sexo" => 'string|max:1',
-            "celular" => 'string|max:255',
+            "alias" => 'string|max:255',
+            "gender" => 'string|max:1',
+            "phone" => 'string|max:255',
             "email" => 'required|string|email|max:255|unique:users,email',
             "password" => 'string|min:8',
+            "dt_birthdate" => 'string'
         ];
     }
 
