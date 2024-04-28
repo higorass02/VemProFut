@@ -16,7 +16,9 @@ class UserRequest extends FormRequest
             "email" => 'required|string|email|max:255|unique:users,email',
             "password" => 'string|min:8',
             "dt_birthdate" => 'string',
-            "role" => 'numeric'
+            "role" => 'numeric',
+            "position" => 'string',
+            "payer" => 'numeric|max:1'
         ];
     }
 

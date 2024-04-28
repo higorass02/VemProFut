@@ -7,6 +7,11 @@ class MatchConfig extends Model
 {
     const TEAM_DISTINCT_NUMBER = 0;
     const TEAM_DISTINCT_COLOR = 1;
+
+    const TYPE_SORT_RANDOM = 0;
+    const TYPE_SORT_MANUAL = 1;
+    const TYPE_SORT_BALANCE = 2;
+    
     protected $fillable = [
         'match_id',
         'goal_keeper_fix',

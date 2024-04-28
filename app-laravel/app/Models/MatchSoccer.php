@@ -36,6 +36,6 @@ class MatchSoccer extends Model
 
     public function group(): ?HasOne
     {
-        return $this->hasOne(Group::class, 'group_id', 'id');
+        return $this->hasOne(Group::class, 'id', 'group_id');
     }
 }

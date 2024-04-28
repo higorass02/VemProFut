@@ -13,4 +13,10 @@ class UserGroup extends Model
     ];
     protected $hidden = [];
     protected $casts = [];
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
+    
 }

@@ -19,6 +19,13 @@ class User extends Authenticatable
     const SEXO_FEMININO = "F";
     const SEXO_INDEFINIDO = "I";
 
+    const POSITION_GOALKEEPER = 0;
+    const POSITION_DEFENDER = 1;
+    const POSITION_LEFT = 2;
+    const POSITION_RIGHT = 3;
+    const POSITION_MID = 4;
+    const POSITION_FORWARD = 5;
+
     /**
      * The attributes that are mass assignable.
      *
