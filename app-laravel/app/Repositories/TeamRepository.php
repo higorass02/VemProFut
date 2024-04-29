@@ -226,74 +226,73 @@ class TeamRepository
         $indexTeam = 1;
         //percorer times para preencher
         while($indexTeam <= count($this->teams)){
-            var_dump('contador time '.$indexTeam);
-            var_dump(count($this->teamsAllNames[$indexTeam]));
-            var_dump($limit);
-            if(count($this->teamsAllNames[$indexTeam]) <= $limit+1){
-                //percorer jogadores 
-                foreach($players as $keyPosition => $value){
-                    //preencher times
-                    //validar se possuem opções para sortear
-                    if($convidado){
-                        var_dump($value);
-                        var_dump('--------------');
-                        var_dump(is_array($value));
-                        var_dump(!empty($value));
-                    }
-                    if(is_array($value) && !empty($value)){
-                        var_dump(1);
-                        if(isset($this->maxPlayesPositions[$keyPosition])){
-                            var_dump(2);
-                            //valida se possuem jogadores suficientes para sortear
-                            if(count($value) > $this->maxPlayesPositions[$keyPosition]){
-                                var_dump(3);
-                                //gerar sorteado por posição
-                                $keySort = array_rand($value, $this->maxPlayesPositions[$keyPosition]);
-                                //se houver mais de um sorteado
-                                if(is_array($keySort)){
-                                    var_dump(4);
-                                    //preenche time
-                                    foreach($keySort as $nkey => $nValue){
-                                        //validar se ja existem jogadores maximos por posição
-                                        if($this->maxPlayesPositions[$keyPosition] > count($this->teams[$indexTeam][$keyPosition])){
-                                            var_dump(5);
-                                            $this->teams[$indexTeam][$keyPosition][] = $players[$keyPosition][$nValue]->name;
-                                            $this->teamsAllNames[$indexTeam][] = $players[$keyPosition][$nValue]->name;
-                                            unset($players[$keyPosition][$nValue]);
-                                        }
-                                    }
-                                //caso de haver apenas um jogar para a posição
-                                }else{
-                                    var_dump(6);
-                                    $this->teams[$indexTeam][$keyPosition][] = $players[$keyPosition][$keySort]->name;
-                                    $this->teamsAllNames[$indexTeam][] = $players[$keyPosition][$keySort]->name;
-                                    unset($players[$keyPosition][$keySort]);
-                                }
-                            //caso de exista apenas aqueles jogadores para a posição
-                            }else{
-                                var_dump(7);
-                                //preenche time
-                                foreach($value as $nkey => $nValue){
-                                    if($this->maxPlayesPositions[$keyPosition] > count($this->teams[$indexTeam][$keyPosition])){
-                                        $this->teams[$indexTeam][$keyPosition][] = $players[$keyPosition][$nkey]->name;
-                                        $this->teamsAllNames[$indexTeam][] = $players[$keyPosition][$nkey]->name;
-                                        unset($players[$keyPosition][$nkey]);
-                                    }
-                                }
-                            }
-                        }else{
-                            var_dump(8);
-                        }
-                    }else{
-                        if($convidado){
-                            var_dump('sem convidados nessa posição');
-                        }
-                    }
-                }
-                $indexTeam++;
-            }else{
+            // var_dump('contador time '.$indexTeam);
+            // var_dump(count($this->teamsAllNames[$indexTeam]));
+            // var_dump($limit);
+            if(count($this->teamsAllNames[$indexTeam]) > $limit+1){
                 $indexTeam++;
             }
+            //percorer jogadores 
+            foreach($players as $keyPosition => $value){
+                //preencher times
+                //validar se possuem opções para sortear
+                if($convidado){
+                    // var_dump($value);
+                    // var_dump('--------------');
+                    // var_dump(is_array($value));
+                    // var_dump(!empty($value));
+                }
+                if(is_array($value) && !empty($value)){
+                    // var_dump(1);
+                    if(isset($this->maxPlayesPositions[$keyPosition])){
+                        // var_dump(2);
+                        //valida se possuem jogadores suficientes para sortear
+                        if(count($value) > $this->maxPlayesPositions[$keyPosition]){
+                            // var_dump(3);
+                            //gerar sorteado por posição
+                            $keySort = array_rand($value, $this->maxPlayesPositions[$keyPosition]);
+                            //se houver mais de um sorteado
+                            if(is_array($keySort)){
+                                // var_dump(4);
+                                //preenche time
+                                foreach($keySort as $nkey => $nValue){
+                                    //validar se ja existem jogadores maximos por posição
+                                    if($this->maxPlayesPositions[$keyPosition] > count($this->teams[$indexTeam][$keyPosition])){
+                                        // var_dump(5);
+                                        $this->teams[$indexTeam][$keyPosition][] = $players[$keyPosition][$nValue]->name;
+                                        $this->teamsAllNames[$indexTeam][] = $players[$keyPosition][$nValue]->name;
+                                        unset($players[$keyPosition][$nValue]);
+                                    }
+                                }
+                            //caso de haver apenas um jogar para a posição
+                            }else{
+                                // var_dump(6);
+                                $this->teams[$indexTeam][$keyPosition][] = $players[$keyPosition][$keySort]->name;
+                                $this->teamsAllNames[$indexTeam][] = $players[$keyPosition][$keySort]->name;
+                                unset($players[$keyPosition][$keySort]);
+                            }
+                        //caso de exista apenas aqueles jogadores para a posição
+                        }else{
+                            // var_dump(7);
+                            //preenche time
+                            foreach($value as $nkey => $nValue){
+                                if($this->maxPlayesPositions[$keyPosition] > count($this->teams[$indexTeam][$keyPosition])){
+                                    $this->teams[$indexTeam][$keyPosition][] = $players[$keyPosition][$nkey]->name;
+                                    $this->teamsAllNames[$indexTeam][] = $players[$keyPosition][$nkey]->name;
+                                    unset($players[$keyPosition][$nkey]);
+                                }
+                            }
+                        }
+                    }else{
+                        // var_dump(8);
+                    }
+                }else{
+                    if($convidado){
+                        // var_dump('sem convidados nessa posição'.$keyPosition);
+                    }
+                }
+            }
+            $indexTeam++;
         }
     }
     private function validCountPlayers(array $palyers)
