@@ -152,6 +152,38 @@ class DatabaseSeeder extends Seeder
             $i++;
         }
 
+        DB::table('users')->insert([
+            'name' => $faker->name(),
+            'alias' => $faker->name(),
+            'phone' => $faker->phoneNumber(),
+            'dt_birthdate' => $faker->date(),
+            'role' => rand(1,2),
+            'gender' => $this->getSexo(),
+            'email' => $faker->email(),
+            'position' => User::POSITION_DEFENDER,
+            'payer' => false,
+            'password' => Hash::make('password'),
+            'created_at' => new Carbon(),
+            'updated_at' => new Carbon()
+        ]);
+        $i++;
+
+        DB::table('users')->insert([
+            'name' => $faker->name(),
+            'alias' => $faker->name(),
+            'phone' => $faker->phoneNumber(),
+            'dt_birthdate' => $faker->date(),
+            'role' => rand(1,2),
+            'gender' => $this->getSexo(),
+            'email' => $faker->email(),
+            'position' => User::POSITION_MID,
+            'payer' => false,
+            'password' => Hash::make('password'),
+            'created_at' => new Carbon(),
+            'updated_at' => new Carbon()
+        ]);
+        $i++;
+
         DB::table('groups')->insert([
             'alias' => $faker->name(),
             'user_id' => $userAdmin->id,

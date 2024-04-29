@@ -12,6 +12,13 @@ class TeamRepository
     private UserRepository $userRepository;
     private MatchSoccerRepository $matchRepository;
     private UserGroupRepository $userGroupRepository;
+    private $payments = [];
+    private $noPayments = [];
+    private $tempPlayes = [];
+    private $teams = null;
+    private $teamsAllNames = null;
+    private $maxPlayesPositions = [];
+    private $countTeams = 0;
 
     public function __construct(
         ?Team $model = null,
@@ -24,6 +31,7 @@ class TeamRepository
         $this->userRepository = $userRepository ?? new UserRepository();
         $this->matchRepository = $matchRepository ?? new MatchSoccerRepository();
         $this->userGroupRepository = $userGroupRepository ?? new UserGroupRepository();
+        $this->payments = [];
     }
 
     public function all()
@@ -42,105 +50,41 @@ class TeamRepository
         //buscar usuario do grupo
         $users = $this->userGroupRepository->getUsers($match->group_id);
 
-        $payments = [];
-        foreach($users as $user){
-            if($user->payer){
-                $payments[] = $user;
-            }
+        //filtrar usuario pagantes
+        $this->filterPayers($users);
+
+        //instaciar limitadores por posição
+        $tempPlayesPayment = $this->setUserPerPosition($this->payments);
+        $tempPlayesNoPayment = $this->setUserPerPosition($this->noPayments);
+        
+        $countPlayers = count($users);
+
+        if(isset($tempPlayesPayment['goalKeeper'])){
+            $countPlayers -= count($tempPlayesPayment['goalKeeper']);
+        }
+        if(isset($tempPlayesNoPayment['goalKeeper'])){
+            $countPlayers -= count($tempPlayesNoPayment['goalKeeper']);
+        }
+        
+        $maxLineUp = $match->config->max_playes_line;
+        $qtdTeams =(int) number_format(round($countPlayers/$maxLineUp, 1), 0);
+        $this->configTeams($match->config->distinct_team, $qtdTeams);
+        // dd($this->teams);
+        // criar limitador de jogadores por posição
+        $this->setMaxPlayersPerPosition($maxLineUp, $tempPlayesPayment);
+
+        //metodo principal de sorteio random
+        if($this->validCountPlayers($tempPlayesPayment) > 0){
+            $this->sortingPlayes($tempPlayesPayment, $maxLineUp);
         }
 
-        $tempPlayes['goalKeeper'] = [];
-        $tempPlayes['defencer'] = [];
-        $tempPlayes['mid'] = [];
-        $tempPlayes['left'] = [];
-        $tempPlayes['right'] = [];
-        $tempPlayes['forward'] = [];
-
-        foreach($payments as $userPayer){
-            if($userPayer->position == User::POSITION_GOALKEEPER){
-                $tempPlayes['goalKeeper'][] = $userPayer;
-            }else if($userPayer->position == User::POSITION_DEFENDER){
-                $tempPlayes['defencer'][] = $userPayer;
-            }else if($userPayer->position == User::POSITION_LEFT){
-                $tempPlayes['left'][] = $userPayer;
-            }else if($userPayer->position == User::POSITION_RIGHT){
-                $tempPlayes['right'][] = $userPayer;
-            }else if($userPayer->position == User::POSITION_MID){
-                $tempPlayes['mid'][] = $userPayer;
-            }else if($userPayer->position == User::POSITION_FORWARD){
-                $tempPlayes['forward'][] = $userPayer;
-            }
+        if($this->validCountPlayers($tempPlayesNoPayment) > 0){
+            $this->sortingPlayes($tempPlayesNoPayment, $maxLineUp, 'Convidados');
         }
 
-        $playesNumber = count($users);
-
-        //validar config de goleiro fixo
-        if($match->config->goal_keeper_fix){
-            $playesNumber -= count($tempPlayes['goalKeeper']);
-            $qtdTeams =(int) number_format(round($playesNumber/$match->config->max_playes_line, 1), 0);
-            $teams = null;
-
-            //criar quantidade de timer
-            if($match->config->distinct_team == MatchConfig::TEAM_DISTINCT_NUMBER){
-                $i = 1;
-                while($i <= $qtdTeams){
-                    $teams[$i] = [];
-                    $i++;
-                }
-            }
-            $countTeams = count($teams);
-
-            // criar limitador de jogadores por posição
-            $maxPlayesPositions = [];
-            foreach($tempPlayes as $keyPosition2 => $value){
-                $maxPlayesPositions[$keyPosition2] =(int) number_format(round(count($value)/$countTeams, 1), 0);
-            }
-            
-            $indexTeam = 0;
-            //percorer times para preencher
-            while($indexTeam < count($teams)){
-                //percorer jogadores 
-                foreach($tempPlayes as $keyPosition => $value){
-                    $teams[$indexTeam][$keyPosition] = [];
-                    //preencher times
-                    //validar se possuem opções para sortear
-                    if(is_array($value) && !empty($value)){
-                        //valida se possuem jogadores suficientes para sortear
-                        if(count($value) > $maxPlayesPositions[$keyPosition]){
-                            //gerar sorteado por posição
-                            $keySort = array_rand($value, $maxPlayesPositions[$keyPosition]);
-                            //se houver mais de um sorteado
-                            if(is_array($keySort)){
-                                //preenche time
-                                foreach($keySort as $nkey => $nValue){
-                                    //validar se ja existem jogadores maximos por posição
-                                    if($maxPlayesPositions[$keyPosition] > count($teams[$indexTeam][$keyPosition])){
-                                        $teams[$indexTeam][$keyPosition][] = $tempPlayes[$keyPosition][$nValue]->name;
-                                        unset($tempPlayes[$keyPosition][$nValue]);
-                                    }
-                                }
-                            //caso de haver apenas um jogar para a posição
-                            }else{
-                                $teams[$indexTeam][$keyPosition][] = $tempPlayes[$keyPosition][$keySort]->name;
-                                unset($tempPlayes[$keyPosition][$keySort]);
-                            }
-                        //caso de exista apenas aqueles jogadores para a posição
-                        }else{
-                            //preenche time
-                            foreach($value as $nkey => $nValue){
-                                if($maxPlayesPositions[$keyPosition] > count($teams[$indexTeam][$keyPosition])){
-                                    $teams[$indexTeam][$keyPosition][] = $tempPlayes[$keyPosition][$nkey]->name;
-                                    unset($tempPlayes[$keyPosition][$nkey]);
-                                }
-                            }
-                        }
-                        
-                    }
-                }
-                $indexTeam++;
-            }
-            dd($teams);
-        }
+        // dd($this->noPayments);
+        dd($this->teams);
+        // }
         //ordernar priorização
         //1) mensalisatas
         //2) posição
@@ -209,25 +153,157 @@ class TeamRepository
             throw new \InvalidArgumentException('Match config not Found!');
         }
     }
-    public function sortPlayers($qtd, $maxPosition)
+
+    private function filterPayers($users)
     {
-        $jogadores = null;
-        if($qtd > 1 && $maxPosition >1){
-            $listaDeNumeros = range(0, $maxPosition-1);
-            $numeros = array_rand(array_flip($listaDeNumeros), $qtd);
-            
-            $jogadores = array_map(function($value){
-                return str_pad($value, 2, '0', STR_PAD_LEFT);   
-            }, $numeros);
-        }else if($qtd == 1 && $maxPosition > 1){
-            $listaDeNumeros = range(0, $maxPosition-1);
-            $jogadores = array_rand(array_flip($listaDeNumeros), $qtd);
-        }else if($qtd <= 1 && $maxPosition == 1){
-            return 'find';
-        }else{
-            dd($qtd, $maxPosition);
-            throw new \InvalidArgumentException('Error in Process Sort');
+        foreach($users as $user){
+            if($user->payer){
+                $this->payments[] = $user;
+            }else{
+                $this->noPayments[] = $user;
+            }
         }
-        return $jogadores;
+    }
+    private function setUserPerPosition($playes)
+    {
+        $tempPlayes = null;
+
+        foreach($playes as $userPayer){
+            if($userPayer->position == User::POSITION_GOALKEEPER){
+                $tempPlayes['goalKeeper'][] = $userPayer;
+            }else if($userPayer->position == User::POSITION_DEFENDER){
+                $tempPlayes['defencer'][] = $userPayer;
+            }else if($userPayer->position == User::POSITION_LEFT){
+                $tempPlayes['left'][] = $userPayer;
+            }else if($userPayer->position == User::POSITION_RIGHT){
+                $tempPlayes['right'][] = $userPayer;
+            }else if($userPayer->position == User::POSITION_MID){
+                $tempPlayes['mid'][] = $userPayer;
+            }else if($userPayer->position == User::POSITION_FORWARD){
+                $tempPlayes['forward'][] = $userPayer;
+            }
+        }
+        return $tempPlayes;
+    }
+    private function configTeams($distinctTeam, $qtdTeams)
+    {
+        //criar quantidade de timer
+        if($distinctTeam == MatchConfig::TEAM_DISTINCT_NUMBER){
+            $i = 1;
+            while($i <= $qtdTeams){
+                $this->teams[$i]['goalKeeper'] = [];
+                $this->teams[$i]['defencer'] = [];
+                $this->teams[$i]['left'] = [];
+                $this->teams[$i]['right'] = [];
+                $this->teams[$i]['mid'] = [];
+                $this->teams[$i]['forward'] = [];
+                $this->teamsAllNames[$i] = [];
+                $i++;
+            }
+        }
+        $this->countTeams = count($this->teams);
+    }
+
+    private function setMaxPlayersPerPosition($limit, $tempPlayesPayment)
+    {
+        $totPlayersLineup = 0;
+        foreach($tempPlayesPayment as $keyPosition => $value){            
+            if($keyPosition == 'goalKeeper'){
+                $this->maxPlayesPositions[$keyPosition] = 1;
+            }else{
+                if($totPlayersLineup <= $limit){
+                    $maxPosition = (int) number_format(round(count($value)/$this->countTeams, 1), 0);
+                    if($totPlayersLineup + $maxPosition <= $limit){
+                        $totPlayersLineup += $maxPosition;
+                        $this->maxPlayesPositions[$keyPosition] = $maxPosition;
+                    }
+                }
+            }
+        }
+    }
+    private function sortingPlayes($players, $limit, $convidado = null)
+    {
+        $indexTeam = 1;
+        //percorer times para preencher
+        while($indexTeam <= count($this->teams)){
+            var_dump('contador time '.$indexTeam);
+            var_dump(count($this->teamsAllNames[$indexTeam]));
+            var_dump($limit);
+            if(count($this->teamsAllNames[$indexTeam]) <= $limit+1){
+                //percorer jogadores 
+                foreach($players as $keyPosition => $value){
+                    //preencher times
+                    //validar se possuem opções para sortear
+                    if($convidado){
+                        var_dump($value);
+                        var_dump('--------------');
+                        var_dump(is_array($value));
+                        var_dump(!empty($value));
+                    }
+                    if(is_array($value) && !empty($value)){
+                        var_dump(1);
+                        if(isset($this->maxPlayesPositions[$keyPosition])){
+                            var_dump(2);
+                            //valida se possuem jogadores suficientes para sortear
+                            if(count($value) > $this->maxPlayesPositions[$keyPosition]){
+                                var_dump(3);
+                                //gerar sorteado por posição
+                                $keySort = array_rand($value, $this->maxPlayesPositions[$keyPosition]);
+                                //se houver mais de um sorteado
+                                if(is_array($keySort)){
+                                    var_dump(4);
+                                    //preenche time
+                                    foreach($keySort as $nkey => $nValue){
+                                        //validar se ja existem jogadores maximos por posição
+                                        if($this->maxPlayesPositions[$keyPosition] > count($this->teams[$indexTeam][$keyPosition])){
+                                            var_dump(5);
+                                            $this->teams[$indexTeam][$keyPosition][] = $players[$keyPosition][$nValue]->name;
+                                            $this->teamsAllNames[$indexTeam][] = $players[$keyPosition][$nValue]->name;
+                                            unset($players[$keyPosition][$nValue]);
+                                        }
+                                    }
+                                //caso de haver apenas um jogar para a posição
+                                }else{
+                                    var_dump(6);
+                                    $this->teams[$indexTeam][$keyPosition][] = $players[$keyPosition][$keySort]->name;
+                                    $this->teamsAllNames[$indexTeam][] = $players[$keyPosition][$keySort]->name;
+                                    unset($players[$keyPosition][$keySort]);
+                                }
+                            //caso de exista apenas aqueles jogadores para a posição
+                            }else{
+                                var_dump(7);
+                                //preenche time
+                                foreach($value as $nkey => $nValue){
+                                    if($this->maxPlayesPositions[$keyPosition] > count($this->teams[$indexTeam][$keyPosition])){
+                                        $this->teams[$indexTeam][$keyPosition][] = $players[$keyPosition][$nkey]->name;
+                                        $this->teamsAllNames[$indexTeam][] = $players[$keyPosition][$nkey]->name;
+                                        unset($players[$keyPosition][$nkey]);
+                                    }
+                                }
+                            }
+                        }else{
+                            var_dump(8);
+                        }
+                    }else{
+                        if($convidado){
+                            var_dump('sem convidados nessa posição');
+                        }
+                    }
+                }
+                $indexTeam++;
+            }else{
+                $indexTeam++;
+            }
+        }
+    }
+    private function validCountPlayers(array $palyers)
+    {
+        $return = 0;
+        foreach($palyers as $keyPosition => $player){
+            if($return <= 0){
+                $return = count($palyers[$keyPosition]);   
+            }
+        }
+        return $return;
     }
 }
